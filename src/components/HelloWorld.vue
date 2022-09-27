@@ -3,6 +3,12 @@
   <h1>{{sessionName}}</h1>
 
   <div class="controls">
+    <div class="create">
+      <h3>Vytvor nový projekt:</h3>
+      <button @click="createNewSession">
+        Začať
+      </button>
+    </div>
     <div class="choose">
       <h3>Vyber iný projekt:</h3>
       <select @change="changeSession($event)">
@@ -11,12 +17,6 @@
           {{session}}
         </option>
       </select>
-    </div>
-    <div class="create">
-      <h3>Vytvor nový projekt:</h3>
-      <button @click="createNewSession">
-        Začať
-      </button>
     </div>
   </div>
 
@@ -67,6 +67,10 @@
   <button class="submit" v-on:click="handleAddItem">
     Pridať
   </button>
+
+  <p>
+    <em>Kliknutím na názov riadku možno pričítavať a odčítavať použitím zápornej hodnoty. Ak obe hodnoty nastavíš na negatívne, vymažeš tým celý riadok.</em>
+  </p>
 
   <table class="table">
     <tr>
@@ -129,7 +133,6 @@ onMounted(() => {
   });
   sessionName.value = loadLastSession ?? shortName
   allSessions.value = Object.keys(localStorage).filter(val => val.startsWith('estim-val-price-diff-app') && val !== 'estim-val-price-diff-app-last').map(val => val.replace('estim-val-price-diff-app-', ''))
-  console.log(allSessions)
 })
 
 const changeSession = (event: any) => {
@@ -144,20 +147,21 @@ const createNewSession = () => {
   });
   items.value = []
   sessionName.value = newSessionName
+  allSessions.value?.push(newSessionName)
 }
 
-const billedTotal = items.value ? computed(() => items.value!.reduce<number>((prev, curr) => {
+const billedTotal = computed(() => items.value ? items.value!.reduce<number>((prev, curr) => {
     return prev + Number(curr.billedPrice)
-  }, 0)
-) : 0;
-const plannedTotal = items.value ? computed(() => items.value!.reduce<number>((prev, curr) => {
+  }, 0) : 0
+);
+const plannedTotal = computed(() => items.value ? items.value!.reduce<number>((prev, curr) => {
     return prev + Number(curr.plannedPrice)
-  }, 0)
-) : 0;
-const diffTotal = items.value ? computed(() => items.value!.reduce<number>((prev, curr) => {
+  }, 0) : 0
+);
+const diffTotal = computed(() => items.value ? items.value!.reduce<number>((prev, curr) => {
     return prev + (Number(curr.plannedPrice) - Number(curr.billedPrice))
-  }, 0)
-) : 0;
+  }, 0) : 0
+);
 
 const handleAddItem = () => {
   if (name.value.length > 0) {
@@ -192,7 +196,16 @@ const handleAddItem = () => {
 </script>
 
 <style scoped>
-
+  em {
+    font-size: 0.8rem;
+  }
+  h1 {
+    background-color: rgba(99, 107, 255, 0.25);
+    padding: 1rem 0rem;
+    letter-spacing: 0.15rem;
+    border-radius: 2px;
+    border: solid 2px #646cff;
+  }
   .controls {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -242,5 +255,41 @@ const handleAddItem = () => {
   }
   .bilance-negative {
     background-color: rgb(180, 75, 75, 0.5);
+  }
+
+  @media screen and (max-width: 400px) {
+    table, td, th {
+      font-size: 80%;
+      padding: 0.2rem;
+    }
+    h1 {
+      font-size: 0.9rem !important;
+    }
+    em {
+      font-size: 0.6rem !important;
+    }
+  }
+
+  @media screen and (max-width: 768px) {
+    em {
+      font-size: 0.7rem !important;
+    }
+    
+    h1 {
+      font-size: 1.15rem;
+      padding: 0.35rem 0rem;
+    }
+
+    h3 {
+      font-size: 1rem;
+    }
+    .inputs {
+      display: grid;
+      grid-template-columns: 1fr;
+    }
+
+    .controls {
+      grid-template-columns: 1fr;
+    }
   }
 </style>
