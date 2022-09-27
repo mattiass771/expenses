@@ -1,6 +1,7 @@
 <template>
   <h3>Aktuálny projekt:</h3>
-  <h1>{{sessionName}}</h1>
+  <h1>{{sessionName}} </h1>
+  <div><button @click="removeSession">Vymazať projekt</button></div>
 
   <div class="controls">
     <div class="create">
@@ -10,7 +11,7 @@
       </button>
     </div>
     <div class="choose">
-      <h3>Vyber iný projekt:</h3>
+      <h3>Výber projektov:</h3>
       <select @change="changeSession($event)">
         <option :selected="true"></option>
         <option v-for="session in allSessions" v-bind:key="session">
@@ -25,7 +26,7 @@
       <label
         for="name-input"
       >
-        Názov práce
+        Názov položky
       </label>
       <br />
       <input
@@ -74,7 +75,7 @@
 
   <table class="table">
     <tr>
-      <th>Názov práce</th>
+      <th>Názov položky</th>
       <th>Plánovaná cena</th>
       <th>Účtovaná cena</th>
       <th>Rozdiel</th>
@@ -131,7 +132,7 @@ onMounted(() => {
   const shortName: string = uniqueNamesGenerator({
     dictionaries: [colors, adjectives, animals]
   });
-  sessionName.value = loadLastSession ?? shortName
+  sessionName.value = loadLastSession && loadLastSession.length > 0 ? loadLastSession : shortName
   allSessions.value = Object.keys(localStorage).filter(val => val.startsWith('estim-val-price-diff-app') && val !== 'estim-val-price-diff-app-last').map(val => val.replace('estim-val-price-diff-app-', ''))
 })
 
@@ -141,13 +142,21 @@ const changeSession = (event: any) => {
   sessionName.value = event.target.value
 }
 
+const removeSession = () => {
+  localStorage.removeItem(`estim-val-price-diff-app-${sessionName.value}`)
+  allSessions.value = allSessions.value?.filter(val => val !== sessionName.value)
+  localStorage.setItem('estim-val-price-diff-app-last', allSessions?.value?.[allSessions?.value.length-1] ?? '')
+  window.location.reload()
+}
+
 const createNewSession = () => {
   const newSessionName: string = uniqueNamesGenerator({
     dictionaries: [colors, adjectives, animals]
   });
   items.value = []
   sessionName.value = newSessionName
-  allSessions.value?.push(newSessionName)
+  const newSessions = Object.keys(localStorage).filter(val => val.startsWith('estim-val-price-diff-app') && val !== 'estim-val-price-diff-app-last').map(val => val.replace('estim-val-price-diff-app-', ''))
+  allSessions.value = [...newSessions, newSessionName]
 }
 
 const billedTotal = computed(() => items.value ? items.value!.reduce<number>((prev, curr) => {
@@ -187,6 +196,7 @@ const handleAddItem = () => {
     }
     localStorage.setItem(`estim-val-price-diff-app-${sessionName.value}`, JSON.stringify(items.value))
     localStorage.setItem('estim-val-price-diff-app-last', sessionName.value)
+    allSessions.value?.push(sessionName.value)
     name.value = defaultItem.name
     plannedPrice.value = defaultItem.plannedPrice
     billedPrice.value = defaultItem.billedPrice
