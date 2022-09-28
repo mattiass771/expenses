@@ -74,29 +74,33 @@
   </p>
 
   <table class="table">
-    <tr>
-      <th>Názov položky</th>
-      <th>Plánovaná cena</th>
-      <th>Účtovaná cena</th>
-      <th>Rozdiel</th>
-    </tr>
-    <tr v-for="item in items" v-bind:key="item.nameComputed">
-      <td class="clickable-cell" @click="name = item.name">{{item.name}}</td>
-      <td>{{item.plannedPrice}} €</td>
-      <td>{{item.billedPrice}} €</td>
-      <td v-bind:class="Number(item.plannedPrice) - Number(item.billedPrice) >= 0 ? 'bilance-positive' : 'bilance-negative'">
-        {{item.plannedPrice - item.billedPrice}} €
-      </td>
-    </tr>
-    <br />
-    <tr>
-      <td>Sumár</td>
-      <td>{{plannedTotal}} €</td>
-      <td>{{billedTotal}} €</td>
-      <td v-bind:class="diffTotal >= 0 ? 'bilance-positive' : 'bilance-negative'">
-        {{diffTotal}} €
-      </td>
-    </tr>
+    <thead>
+      <tr>
+        <th>Názov položky</th>
+        <th>Plánovaná cena</th>
+        <th>Účtovaná cena</th>
+        <th>Rozdiel</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr v-for="item in items" v-bind:key="item.nameComputed">
+        <td class="clickable-cell" @click="name = item.name">{{item.name}}</td>
+        <td>{{item.plannedPrice}} €</td>
+        <td>{{item.billedPrice}} €</td>
+        <td v-bind:class="Number(item.plannedPrice) - Number(item.billedPrice) >= 0 ? 'bilance-positive' : 'bilance-negative'">
+          {{item.plannedPrice - item.billedPrice}} €
+        </td>
+      </tr>
+      <br />
+      <tr>
+        <td>Sumár</td>
+        <td>{{plannedTotal}} €</td>
+        <td>{{billedTotal}} €</td>
+        <td v-bind:class="diffTotal >= 0 ? 'bilance-positive' : 'bilance-negative'">
+          {{diffTotal}} €
+        </td>
+      </tr>
+    </tbody>
   </table>
 </template>
 
@@ -196,7 +200,9 @@ const handleAddItem = () => {
     }
     localStorage.setItem(`estim-val-price-diff-app-${sessionName.value}`, JSON.stringify(items.value))
     localStorage.setItem('estim-val-price-diff-app-last', sessionName.value)
-    allSessions.value?.push(sessionName.value)
+    if (!allSessions.value?.includes(sessionName.value)) {
+      allSessions.value?.push(sessionName.value)
+    }
     name.value = defaultItem.name
     plannedPrice.value = defaultItem.plannedPrice
     billedPrice.value = defaultItem.billedPrice
